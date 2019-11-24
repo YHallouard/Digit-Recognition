@@ -124,11 +124,12 @@ class Classifieur():
         X_train = self.X/255
         Y_train = self.target
 
-        self.classifieur.fit(X_train, Y_train,
+        history = self.classifieur.fit(X_train, Y_train,
                              epochs=epochs,
                              batch_size=batch_size,
                              shuffle=True,
                              validation_split=0.2)
+        return history
 
     def plot(self, X=None):
         inte = np.random.randint(0, X.shape[0], 4)

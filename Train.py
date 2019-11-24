@@ -33,6 +33,6 @@ new_target = DCL.build_target(target)
 # -----------------
 CL = DCL.Classifieur(X=X.astype('float32'), target=new_target)
 CL.classifieur.summary()
-CL.train(epochs=10, batch_size=128)
+history = CL.train(epochs=10, batch_size=128)
 
 #pred = CL.classifieur.predict((CL.X[1:8]/255).astype('float32'))
