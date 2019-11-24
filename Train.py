@@ -10,6 +10,8 @@ from tensorflow.keras.layers import Input, Dense, BatchNormalization, Conv1D, Ma
 from tensorflow.keras.models import Model
 import Digitclassifieur as DCL
 
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
+
 os.chdir('/Users/yannhallouard/PycharmProjects/DigitClassification')
 
 X = pd.read_csv("./digit-recognizer/train.csv")
@@ -33,6 +35,14 @@ new_target = DCL.build_target(target)
 # -----------------
 CL = DCL.Classifieur(X=X.astype('float32'), target=new_target)
 CL.classifieur.summary()
-history = CL.train(epochs=10, batch_size=128)
+history = CL.train(epochs=20, batch_size=128, show_history=True)
 
-#pred = CL.classifieur.predict((CL.X[1:8]/255).astype('float32'))
+CL.plot((CL.X[1:8]/255).astype('float32'), name="train")
+CL.plot((test[1:8]/255).astype('float32'), name="test")
+
+pred = CL.classifieur.predict((test/255).astype('float32'))
+
+
+a = np.sort(np.max(pred, axis=1))
+
+confidence = np.sum(a < 0.9)/len(a)

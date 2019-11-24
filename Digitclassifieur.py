@@ -1,3 +1,4 @@
+import os
 from tensorflow.keras import backend as K
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,6 +8,11 @@ from tensorflow.keras.layers import Input, Dense, BatchNormalization, Conv2D, Ma
     Reshape, Lambda, Add , GlobalAveragePooling2D,\
     Dropout, LeakyReLU, Activation, AveragePooling1D, PReLU, Softmax, Multiply
 from tensorflow.keras.models import Model, Sequential
+
+
+if not os.path.exists("pictures"):
+    os.makedirs("pictures")
+
 
 class Classifieur():
     def __init__(self, X=None, target=None):
@@ -119,7 +125,7 @@ class Classifieur():
 
         return Model(inputs=ts, outputs=output_layer)
 
-    def train(self, epochs=1, batch_size=128):
+    def train(self, epochs=1, batch_size=128, show_history=False):
         #load data
         X_train = self.X/255
         Y_train = self.target
@@ -129,25 +135,40 @@ class Classifieur():
                              batch_size=batch_size,
                              shuffle=True,
                              validation_split=0.2)
+
+        if (show_history and epochs>1):
+            fig = plt.figure(figsize=(10, 5))
+            plt.plot(history.history['loss'])
+            plt.plot(history.history['val_loss'])
+            fig.savefig("pictures/history.png")
+            plt.close()
+
         return history
 
-    def plot(self, X=None):
-        inte = np.random.randint(0, X.shape[0], 4)
-        # pred = CL.classifieur.predict(CL.X[inte] / 255)
+    def plot(self, X=None, name=''):
+        """
+        Plot images in X with prediction probabilities aside.
 
-        pred = self.classifieur.predict(X / 255)
+        :type X: np.array float32
+        :param X: DataSet of images of size (?, 28, 28, 1)
+        """
+        inte = np.random.randint(0, X.shape[0], 4)
+        pred = self.classifieur.predict(X)
 
         fig = plt.figure(figsize=(10, 5))
         for j in range(len(inte)):
             axs = fig.add_subplot(2, 2, j + 1)
-            plt.imshow(X[inte[j]].astype('int').reshape(28, 28))
+            plt.imshow(X[inte[j]].reshape(28, 28))
             for i in range(10):
-                plt.text(29, i * 2, '[val : %d] [pred: %f]' % (i, round(pred[j][i], 3)), va="top", family="monospace")
+                plt.text(29, i * 2, '[val : %d] [pred: %f]' % (i, round(pred[inte[j]][i], 3)), va="top", family="monospace")
             plt.xlim(0, 75)
-            plt.show()
+        fig.savefig("pictures/results"+name+".png")
+        plt.close()
 
 def build_target(target):
     """
+    Build the target vector for classification [0,1,5,3...8,9] to probabilities
+    [[1,0,0...0],[0,1,0...0],...[0,0...,0,1]]
 
     :type target: bytearray
     :param target: taget vector of target digit
